@@ -1,0 +1,5 @@
+isin,wkn,name,quantity,transaction_price,transaction_value,transaction_fee,transaction_date,transaction_time,transaction_type,document_page,document_name
+US64110W1027,,"NetEase Inc. Reg.Shs(Sp. ADRs)/100 DL-,0001",16,72.34,1163.94,6.5,21-10-2014,19:16,Purchase,1,20141021_Wertpapierabrechnung_Mustermann.pdf
+US64110W1027,,"NetEase Inc. Reg.Shs(Sp. ADRs)/100 DL-,0001",16,0.291741763157554,4.54,,05-12-2014,"",Dividend,1,20141204_Wertpapierertrag_Mustermann.pdf
+US64110W1027,,"NetEase Inc. Reg.Shs(Sp. ADRs)/100 DL-,0001",16,80,1273.5,6.5,09-12-2014,07:45,Sale,1,20141209_Wertpapierabrechnung_Mustermann.pdf
+DE0005933931,,iShares Core DAX UCITS ETF DE Inhaber-Anteile,12,85.099,1025.64,4.45,14-01-2016,12:17,Purchase,1,20160115_Wertpapierabrechnung_Mustermann.pdf
