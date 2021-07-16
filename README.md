@@ -34,7 +34,7 @@ document.names <- basename(files)
 # i <- 1
 # file <- files[i]
 # document.name <- document.names[i]
-# df.transactions <- BankStatementParser::get_transactions(file,document.name)
+# df.transactions <- BankStatementParser::get_transactions(file, document.name)
 
 list.dfs <- mapply(BankStatementParser::get_transactions, files, document.names, SIMPLIFY = FALSE)
 df.transactions <- do.call(rbind, unname(list.dfs))

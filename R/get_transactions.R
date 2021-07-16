@@ -30,7 +30,7 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     document.name.csv <- paste0(gsub(".pdf$", "", document.name), ".csv")
 
-    df.pdf <- textreadr::read_pdf(paste0(file))
+    df.pdf <- read_pdf(paste0(file))
 
     df.pdf$text_original <- df.pdf$text
 
@@ -54,7 +54,7 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
         ## need to apply OCR because machine written text typically does not store name of the bank
         temp <- tempdir()
         fls <- file.path(temp, paste0(gsub("\\.pdf$", "", document.name), ".png"))
-        png_files <- pdftools::pdf_convert(paste0(file), pages = 1, dpi = 150, filenames = fls)
+        png_files <- pdftools::pdf_convert(file, pages = 1, dpi = 150, filenames = fls)
         text <- tesseract::ocr(png_files)
         unlink(png_files, TRUE, TRUE)
 

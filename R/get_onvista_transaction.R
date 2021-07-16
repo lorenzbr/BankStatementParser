@@ -74,7 +74,7 @@ get_onvista_purchase <- function(df.pdf.page) {
 
   ## identify investment name
   investmentname <- df.transaction.data$text_original[position.isin]
-  investmentname <- gsub(isin,"", investmentname)
+  investmentname <- gsub(isin, "", investmentname)
   investmentname <- gsub("\\s+"," ", investmentname)
   investmentname <- gsub(" $","", investmentname)
 
