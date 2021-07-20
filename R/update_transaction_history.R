@@ -37,7 +37,7 @@ update_transaction_history <- function(df.transactions, path, file) {
   ## load files and append to transaction history
   data.table::fwrite(df.transactions, paste0(path, file), append = TRUE, sep = ";", quote = TRUE)
 
-  ## check that transactions are unique (i.e., no duplicates)
+  ## check that transactions are unique (i.e., no duplicates based on all columns)
   df.transaction.history <- data.table::fread(paste0(path, file))
   df.transaction.history <- unique(df.transaction.history)
   data.table::fwrite(df.transaction.history, paste0(path, file), sep = ";", quote = TRUE)
