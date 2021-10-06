@@ -36,15 +36,15 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     df.pdf$text <- tolower(df.pdf$text)
 
-    if (is.na(depot.bank)) {
+    if ( is.na(depot.bank) ) {
 
-      ## set depot banks
+      ## Set of available depot banks
       onvista <- "OnVista"
       dkb <- "DKB AG"
       cortalconsors <- "Cortal Consors"
       scalablecapital <- "Scalable Capital"
 
-      ## IDENTIFY DEPOT BANK
+      #### IDENTIFY DEPOT BANK
       if ( any(grepl("cortal consors", df.pdf$text)) ) {depot.bank <- cortalconsors
 
       } else if ( any(grepl("scalable capital", df.pdf$text)) ) { depot.bank <- scalablecapital
@@ -68,18 +68,19 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     }
 
-    ## first page
+    ## First page
     first.page <- 1
     df.pdf.page <- df.pdf[df.pdf$page_id == first.page, ]
 
-    ## get transaction from first page if bank is onVista, DKB , Scalable Capital or Cortal Consors
-    if (depot.bank == onvista) {
-
-      ## if second page of a transaction exists with no relevant information remove it
+    ## Get transaction from first page if bank is from a known/identified bank
+    if ( depot.bank == onvista ) {
+      
+      ## For onVista, sometimes several pages with transactions exist
+      ## If second page of a transaction exists with no relevant information remove it
       second.page.of.transaction <- df.pdf$page_id[grepl("Seite-Nr\\.", df.pdf$text_original)]
-      if (length(second.page.of.transaction)) {
-        if (max(second.page.of.transaction) > 1) {
-          for (i in 1:length(second.page.of.transaction)) { df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] }
+      if ( length(second.page.of.transaction) ) {
+        if ( max(second.page.of.transaction) > 1 ) {
+          for ( i in 1:length(second.page.of.transaction) ) { df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] }
         }
       }
 

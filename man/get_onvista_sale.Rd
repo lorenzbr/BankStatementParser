@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_onvista_transaction.R
 \name{get_onvista_sale}
 \alias{get_onvista_sale}
-\title{Get sale transaction from onVista bank statement}
+\title{Get sales transaction from onVista bank statement}
 \usage{
 get_onvista_sale(df.pdf.page)
 }
@@ -10,5 +10,5 @@ get_onvista_sale(df.pdf.page)
 \item{df.pdf.page}{A data.frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \description{
-Get sale transaction from onVista bank statement
+Get sales transaction from onVista bank statement
 }
