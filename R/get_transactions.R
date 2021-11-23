@@ -30,7 +30,7 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     document.name.csv <- paste0(gsub(".pdf$", "", document.name), ".csv")
 
-    df.pdf <- read_pdf(paste0(file))
+    df.pdf <- read_pdf(file)
 
     df.pdf$text_original <- df.pdf$text
 
