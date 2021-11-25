@@ -38,35 +38,62 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     if ( is.na(depot.bank) ) {
 
-      ## Set of available depot banks
+      ## Define strings for all available depot banks / brokers
       onvista <- "OnVista"
       dkb <- "DKB AG"
       cortalconsors <- "Cortal Consors"
       scalablecapital <- "Scalable Capital"
 
       #### IDENTIFY DEPOT BANK
-      if ( any(grepl("cortal consors", df.pdf$text)) ) {depot.bank <- cortalconsors
+      if ( any(grepl("cortal consors", df.pdf$text)) ) { 
+        
+        depot.bank <- cortalconsors
 
-      } else if ( any(grepl("scalable capital", df.pdf$text)) ) { depot.bank <- scalablecapital
-
-      } else {
-
-        ## need to apply OCR because machine written text typically does not store name of the bank
-        temp <- tempdir()
-        fls <- file.path(temp, paste0(gsub("\\.pdf$", "", document.name), ".png"))
-        png_files <- pdftools::pdf_convert(file, pages = 1, dpi = 150, filenames = fls)
-        text <- tesseract::ocr(png_files)
-        unlink(png_files, TRUE, TRUE)
-
-        if (grepl("onvista", tolower(text))) {depot.bank <- onvista
-
-        } else if (grepl("deutsche kreditbank", tolower(text))) {depot.bank <- dkb
-
-        } else { stop("PDF not issued by onVista, DKB or Cortal Consors. Other depot banks or brokers are not included.") }
-
+      } else if ( any(grepl("scalable capital", df.pdf$text)) ) {
+        
+        depot.bank <- scalablecapital
+        
+      } else if ( any(grepl("onvista bank", df.pdf$text)) ||
+                  any(grepl("dieser beleg wird maschinell erstellt", df.pdf$text)) ) {
+        
+        depot.bank <- onvista
+        
+      } else if ( any(grepl("10919 berlin", df.pdf$text)) ) {
+          
+          depot.bank <- dkb
+        
       }
 
     }
+    
+    if ( is.na(depot.bank) ) {
+      
+      ## Need to apply OCR because machine written PDF sometimes does not store the name of the bank
+      ## THIS IS VERY SLOW!!!
+      temp <- tempdir()
+      fls <- file.path(temp, paste0(gsub("\\.pdf$", "", document.name), ".png"))
+      png_files <- pdftools::pdf_convert(file, pages = 1, dpi = 150, filenames = fls)
+      text <- tesseract::ocr(png_files)
+      text <- tolower(text)
+      unlink(png_files, TRUE, TRUE)
+      
+      if ( grepl("onvista", text) ) {
+        
+        depot.bank <- onvista
+        
+      } else if ( grepl("deutsche kreditbank", text) ) {
+        
+        depot.bank <- dkb
+        
+      } else { 
+        
+        stop("PDF not issued by onVista, DKB or Cortal Consors. Other depot banks or brokers are not included.") 
+        
+      }
+      
+    }
+    
+    
 
     ## First page
     first.page <- 1
@@ -77,91 +104,100 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
       
       ## For onVista, sometimes several pages with transactions exist
       ## If second page of a transaction exists with no relevant information remove it
-      second.page.of.transaction <- df.pdf$page_id[grepl("Seite-Nr\\.", df.pdf$text_original)]
-      if ( length(second.page.of.transaction) ) {
+      second.page.of.transaction <- df.pdf$page_id[grepl("seite-nr\\.", df.pdf$text)]
+      if ( length(second.page.of.transaction) > 0 ) {
         if ( max(second.page.of.transaction) > 1 ) {
-          for ( i in 1:length(second.page.of.transaction) ) { df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] }
+          for ( i in 1:length(second.page.of.transaction) ) { 
+            df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] 
+          }
         }
       }
 
+      ## Get transaction from first page
       df.transactions <- get_onvista_transaction(df.pdf.page)
 
-    } else if (depot.bank == dkb) {
+    } else if ( depot.bank == dkb ) {
 
       df.transactions <- get_dkb_transaction(df.pdf.page)
 
-    } else if (depot.bank == cortalconsors) {
+    } else if ( depot.bank == cortalconsors ) {
 
-      ## if second page of a transaction exists with no relevant information remove it
-      second.page.of.transaction <- df.pdf$page_id[grepl("Seite 2 zu|Hinweis f.?r Zins- und Dividendengutschriften",
-                                                         df.pdf$text_original)]
-      if (length(second.page.of.transaction)) {
+      ## If second page of a transaction exists with no relevant information remove it
+      second.page.of.transaction <- df.pdf$page_id[grepl("seite 2 zu|hinweis f.?r zins- und dividendengutschriften",
+                                                         df.pdf$text)]
+      if ( length(second.page.of.transaction) ) {
 
-        if (max(second.page.of.transaction) > 1) {
-          for (i in 1:length(second.page.of.transaction)) { df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] }
+        if ( max(second.page.of.transaction) > 1 ) {
+          for ( i in 1:length(second.page.of.transaction) ) { 
+            df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] 
+          }
         }
 
       }
 
       df.transactions <- get_cortalconsors_transaction(df.pdf.page)
 
-    } else if (depot.bank == scalablecapital) {
+    } else if ( depot.bank == scalablecapital ) {
 
-      ## if second page of a transaction exists with no relevant information remove it
-      second.page.of.transaction <- df.pdf$page_id[grepl("Seite 2/2", df.pdf$text_original)]
-      if (length(second.page.of.transaction)) {
+      ## If second page of a transaction exists with no relevant information remove it
+      second.page.of.transaction <- df.pdf$page_id[grepl("seite 2/2", df.pdf$text)]
+      if ( length(second.page.of.transaction) ) {
 
-        if (max(second.page.of.transaction) > 1) {
-          for (i in 1:length(second.page.of.transaction)) { df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] }
+        if ( max(second.page.of.transaction) > 1 ) {
+          for ( i in 1:length(second.page.of.transaction) ) { 
+            df.pdf <- df.pdf[df.pdf$page_id != second.page.of.transaction[i], ] 
+          }
         }
 
       }
 
       df.transactions <- get_scalablecapital_transaction(df.pdf.page)
 
-    } ## end if statement onVista, DKB, Scalable Capital or Cortal Consors transaction
+    } ## End if statement onVista, DKB, Scalable Capital or Cortal Consors transaction
 
 
-    ## add first page
+    ## Add column with first page
     df.transactions$document_page <- first.page
 
     document.size <- length(unique(df.pdf$page_id))
 
-    ## identify how many transactions, i.e. how many pages in PDF
+    ## Identify how many transactions, i.e. how many pages in PDF
     document.pages <- unique(df.pdf$page_id)[unique(df.pdf$page_id) != first.page]
 
 
-    if (document.size > 1) {
+    if ( document.size > 1 ) {
 
-      ## for loop over all transaction in PDF document
-      for (document.page in document.pages) {
+      ## For loop over all transaction in PDF document
+      for ( document.page in document.pages ) {
 
-        ## select page from entire pdf
+        ## Select page from entire pdf
         df.pdf.page <- df.pdf[df.pdf$page_id == document.page, ]
 
 
         ## IDENTIFY ACTUAL TRANSACTION
 
-        ## if depot bank is onVista
-        if (depot.bank == onvista) { df.transaction.temp <- get_onvista_transaction(df.pdf.page) }
+        ## If depot bank is onVista
+        if ( depot.bank == onvista ) df.transaction.temp <- get_onvista_transaction(df.pdf.page)
 
-        ## add document page
+        ## Add document page
         df.transaction.temp$document_page <- document.page
 
-        ## combine entire output in data frame
+        ## Combine entire output in data frame
         df.transactions <- rbind(df.transactions, df.transaction.temp)
 
-      } ## end of for loop over all transactions/pages in pdf
+      } ## End of for loop over all transactions/pages in pdf
 
-    } ## end if condition: if more than 1 page
+    } ## End if condition: if more than 1 page
 
-    ## add document name to data frame
+    ## Add document name to data frame
     df.transactions$document_name <- document.name
 
-    ##  change date style
+    ## Change date style
     df.transactions$transaction_date <- gsub("\\.", "-", df.transactions$transaction_date)
 
-    return(df.transactions) },
+    return(df.transactions) 
+    
+  },
 
   error = function(cond) {
 

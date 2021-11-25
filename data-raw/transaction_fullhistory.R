@@ -1,4 +1,5 @@
-files <- list.files(system.file("extdata", package = "BankStatementParser"), pattern = "pdf", full.names = TRUE)
+files <- list.files(system.file("extdata", package = "BankStatementParser"), 
+                    pattern = "pdf", full.names = TRUE)
 document.names <- basename(files)
 
 list.dfs <- mapply(get_transactions, files, document.names, SIMPLIFY = FALSE)

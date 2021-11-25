@@ -1,7 +1,7 @@
 #' Get transaction from onVista bank statement
 #'
 #' @usage get_onvista_transaction(df.pdf.page)
-#' @param df.pdf.page A data.frame which results from the function [textreadr::read_pdf()].
+#' @param df.pdf.page A data frame which results from the function [textreadr::read_pdf()].
 #'
 #' @export
 get_onvista_transaction <- function(df.pdf.page){
@@ -21,25 +21,26 @@ get_onvista_transaction <- function(df.pdf.page){
 
     df.transaction.output <- get_onvista_purchase(df.pdf)
 
-  } else if ( any(grepl(sale.identifier,df.pdf$text)) ) {
+  } else if ( any(grepl(sale.identifier, df.pdf$text)) ) {
 
     df.transaction.output <- get_onvista_sale(df.pdf)
 
-  } else if ( any(grepl(dividend.identifier,df.pdf$text)) && !(any(grepl("storno",df.pdf$text))) ) {
+  } else if ( any(grepl(dividend.identifier, df.pdf$text)) && 
+              !any(grepl("storno", df.pdf$text)) ) {
 
     df.transaction.output <- get_onvista_dividend(df.pdf)
 
-  } else if ( any(grepl(vorabpauschale.identifier,df.pdf$text)) ) {
+  } else if ( any(grepl(vorabpauschale.identifier, df.pdf$text)) ) {
 
     df.transaction.output <- get_onvista_vorabpauschale(df.pdf)
 
-  } else if ( any(grepl(storno.identifier,df.pdf$text)) ) {
+  } else if ( any(grepl(storno.identifier, df.pdf$text)) ) {
 
     df.transaction.output <- get_onvista_stornodividend(df.pdf)
 
   } else {
 
-    stop(paste("Transaction type of document is unknown."))
+    stop( paste("Transaction type of document is unknown.") )
 
   } ## End of if else condition for transaction type (purchase, sale, dividend, storno, steuerliche vorabpauschale)
 
@@ -155,6 +156,10 @@ get_onvista_sale <- function(df.pdf.page) {
   ## Get position of "wir haben f.?r sie gekauft"
   start.transaction.data <- grep("wir haben f.?r sie verkauft", df.pdf.page$text) + 1
   end.transaction.data <- grep("betrag zu ihren gunsten", df.pdf.page$text) + 1
+  
+  ## Sometimes there is Betrag zu ihren gunsten twice on the same page (because
+  ## of taxes/veraeusserungsverlust aktien usw. then take the last row)
+  end.transaction.data <- end.transaction.data[length(end.transaction.data)]
 
   ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
@@ -164,6 +169,7 @@ get_onvista_sale <- function(df.pdf.page) {
 
   ## Last word one row later is actual ISIN
   isin <- stringr::str_extract(df.transaction.data$text_original[position.isin], '\\w+$')
+  
   ## For other banks WKN is available, here simply set to NA
   wkn <- NA
 
@@ -180,21 +186,26 @@ get_onvista_sale <- function(df.pdf.page) {
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
   
   ## Identify transaction value (takes into account EUR and USD format of transaction document)
-  position.transaction.value <- grep("betrag zu ihren gunsten", df.transaction.data$text) + 1
-  strings.with.transaction.value <- strsplit(df.transaction.data$text_original[position.transaction.value], "\\s+\\s+")[[1]]
-  if ( !(any(grepl("EUR/USD", strings.with.transaction.value))) ) {
-    transaction.value.position <- 3
-  } else if ( any(grepl("EUR/USD", strings.with.transaction.value)) ) {
-    transaction.value.position <- 4
-    transaction.exchangerate <- strings.with.transaction.value[2]
-    if ( grepl("EUR/USD", transaction.exchangerate) ) {
-      transaction.exchangerate <- gsub("EUR/USD ", "", transaction.exchangerate)
-      transaction.exchangerate <- as.numeric(sub(",", ".", transaction.exchangerate, fixed = TRUE))
+  position.transaction.values <- grep("betrag zu ihren gunsten", df.transaction.data$text) + 1
+  transaction.value.final <- 0
+  for ( position.transaction.value in position.transaction.values ) {
+    strings.with.transaction.value <- strsplit(df.transaction.data$text_original[position.transaction.value], "\\s+\\s+")[[1]]
+    if ( !any(grepl("EUR/USD", strings.with.transaction.value)) ) {
+      transaction.value.position <- which(strings.with.transaction.value == "EUR") + 1
+    } else if ( any(grepl("EUR/USD", strings.with.transaction.value)) ) {
+      transaction.value.position <- 4
+      transaction.exchangerate <- strings.with.transaction.value[2]
+      if ( grepl("EUR/USD", transaction.exchangerate) ) {
+        transaction.exchangerate <- gsub("EUR/USD ", "", transaction.exchangerate)
+        transaction.exchangerate <- as.numeric(sub(",", ".", transaction.exchangerate, fixed = TRUE))
+      }
     }
+    transaction.value <- strings.with.transaction.value[transaction.value.position]
+    transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
+    transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
+    transaction.value.final <- transaction.value.final + transaction.value
   }
-  transaction.value <- strings.with.transaction.value[transaction.value.position]
-  transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
-  transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
+  transaction.value <- transaction.value.final
   
   ## Identify transaction price
   transaction.price <- strsplit(df.transaction.data$text_original[position.quantity.and.price], "\\s+\\s+")[[1]][2]

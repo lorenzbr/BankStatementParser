@@ -7,7 +7,7 @@
 #' @param trim logical
 #' @param ocr logical
 #' @param ... Other arguments to be passed to the function
-#' @return A data.frame containing current portfolio.
+#' @return A data frame containing current portfolio.
 #'
 #' @noRd
 read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRUE, ...) {
@@ -16,9 +16,9 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRU
   text <- pdftools::pdf_text(file, ...)
   
   ## Use ocr if pdf is raster not text
-  if (all(text %in% '') & isTRUE(ocr)){
+  if ( all(text %in% '') & isTRUE(ocr) ) {
     
-    if (requireNamespace("tesseract", quietly = TRUE)){
+    if ( requireNamespace("tesseract", quietly = TRUE) ) {
       
       temp <- tempdir()
       fls <- file.path(
@@ -26,13 +26,13 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRU
         paste0(gsub('\\.pdf$', '', base_name(file)), '_', pad_left(seq_along(text)), '.png')
       )
       
-      ## convert to png files for tesseract to interact with
+      ## Convert to png files for tesseract to interact with
       png_files <- pdftools::pdf_convert(file, dpi = 600, filenames = fls)
       
       ## OCR
       text <- tesseract::ocr(png_files)
       
-      ## clean up and remove the png files
+      ## Clean up and remove the png files
       unlink(png_files, TRUE, TRUE)
       
     } else {
@@ -54,7 +54,7 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRU
   text <- strsplit(text, split)
   
   ## formatting 1
-  if (isTRUE(remove.empty)) text <- lapply(text, function(x) x[!grepl("^\\s*$", x)])
+  if ( isTRUE(remove.empty) ) text <- lapply(text, function(x) x[!grepl("^\\s*$", x)])
   
   ## coerce to a data.frame with page numbers
   out <- data.frame(page_id = rep(seq_along(text), sapply(text, length)), 
@@ -62,8 +62,8 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRU
                     text = unlist(text), stringsAsFactors = FALSE)
   
   ## formatting 2
-  if (skip > 0) out <- utils::tail(out, -c(skip))
-  if (isTRUE(trim)) out[['text']] <- trimws(out[['text']])
+  if ( skip > 0 ) out <- utils::tail(out, -c(skip))
+  if ( isTRUE(trim) ) out[['text']] <- trimws(out[['text']])
   
   class(out) <- c("textreadr", "data.frame")
   out
