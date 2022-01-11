@@ -7,10 +7,10 @@
 get_scalablecapital_transaction(df.pdf.page)
 }
 \arguments{
-\item{df.pdf.page}{A data.frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+\item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \value{
-df.transaction.output A data.frame containing the parse transaction.
+A data frame containing the parse transaction.
 }
 \description{
 Get transaction from Scalable Capital statement
