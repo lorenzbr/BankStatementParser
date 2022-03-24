@@ -6,6 +6,7 @@
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable-1)
 [![R-CMD-check](https://github.com/lorenzbr/BankStatementParser/workflows/R-CMD-check/badge.svg)](https://github.com/lorenzbr/BankStatementParser/actions)
+[![Codecov test coverage](https://codecov.io/gh/lorenzbr/BankStatementParser/branch/main/graph/badge.svg)](https://codecov.io/gh/lorenzbr/BankStatementParser?branch=main)
 <!-- badges: end -->
 
 ### Parse PDF bank statements to get financial transactions of stocks and funds
@@ -28,23 +29,26 @@ devtools::install_github("lorenzbr/BankStatementParser")
 ```R
 ## Example
 
-files <- list.files(system.file("extdata", package = "BankStatementParser"), pattern = "pdf", full.names = TRUE)
-document.names <- basename(files)
+files <- list.files(system.file("extdata", package = "BankStatementParser"), 
+                    pattern = "pdf", full.names = TRUE)
+document_names <- basename(files)
 
-# i <- 1
-# file <- files[i]
-# document.name <- document.names[i]
-# df.transactions <- BankStatementParser::get_transactions(file, document.name)
+i <- 1
+file <- files[i]
+document_name <- document_names[i]
+df_transactions <- BankStatementParser::get_transactions(file, document_name)
 
-list.dfs <- mapply(BankStatementParser::get_transactions, files, document.names, SIMPLIFY = FALSE)
-df.transactions <- do.call(rbind, unname(list.dfs))
+list_dfs <- mapply(BankStatementParser::get_transactions, files, 
+                   document_names, SIMPLIFY = FALSE)
+df_transactions <- do.call(rbind, unname(list_dfs))
 
-path.raw.data <- ""
-file.transactions.csv <- "transaction_fullhistory.csv"
+path_raw_data <- ""
+file_transactions_csv <- "transaction_fullhistory.csv"
 
-BankStatementParser::update_transaction_history(df.transactions, path.raw.data, file.transactions.csv)
+BankStatementParser::update_transaction_history(df_transactions, path_raw_data, 
+                                                file_transactions_csv)
 
-# df.test <- data.table::fread(paste0(path.raw.data, file.transactions.csv))
+df_test <- data.table::fread(paste0(path_raw_data, file_transactions_csv))
 ```
 
 

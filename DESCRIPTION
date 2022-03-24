@@ -23,5 +23,6 @@ RoxygenNote: 7.1.1
 URL: https://github.com/lorenzbr/BankStatementParser
 BugReports: https://github.com/lorenzbr/BankStatementParser/issues
 Suggests: 
+    covr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
