@@ -14,7 +14,7 @@ get_scalablecapital_transaction <- function(df.pdf.page) {
   purchase.identifier <- "wertpapierabrechnung: kauf"
 
 
-  if ( any(grepl(purchase.identifier, df.pdf$text)) ) {
+  if (any(grepl(purchase.identifier, df.pdf$text))) {
 
     df.transaction.output <- get_scalablecapital_purchase(df.pdf)
 
@@ -64,7 +64,7 @@ get_scalablecapital_purchase <- function(df.pdf.page) {
   ## Identify quantity
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)[1]
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], "\\s+\\s+")[[1]][1]
-  quantity <- gsub("STK ","",quantity)
+  quantity <- gsub("STK ","", quantity)
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
   ## Identify transaction price
@@ -86,10 +86,12 @@ get_scalablecapital_purchase <- function(df.pdf.page) {
   transaction.fee <- NA
 
   ## Store data in data frame
-  df.transaction.output <- data.frame(isin = isin, wkn = wkn, name = investmentname,quantity = quantity, transaction_price = transaction.price,
-                                      transaction_value = transaction.value, transaction_fee = transaction.fee,
-                                      transaction_date = transaction.date,transaction_time = transaction.time,
-                                      transaction_type = transaction.type)
+  df.transaction.output <- data.frame(
+    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    transaction_price = transaction.price, transaction_value = transaction.value, 
+    transaction_fee = transaction.fee, transaction_date = transaction.date, 
+    transaction_time = transaction.time, transaction_type = transaction.type
+  )
 
   return(df.transaction.output)
 

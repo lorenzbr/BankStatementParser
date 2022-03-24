@@ -7,7 +7,7 @@
 get_cortalconsors_salepart(df.pdf.page)
 }
 \arguments{
-\item{df.pdf.page}{A data.frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+\item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \description{
 Get sale in part transaction from Cortal Consors bank statement

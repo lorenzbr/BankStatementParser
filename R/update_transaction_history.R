@@ -18,10 +18,10 @@ init_transaction_history <- function(path, file, overwrite = FALSE) {
                                                    ncol = length(transaction.colnames),
                                                    dimnames = list(NULL, transaction.colnames)))
 
-  if ( !file.exists(file.path(path, file)) ) {
+  if (!file.exists(file.path(path, file))) {
     data.table::fwrite(df.transaction.history.init, file.path(path, file), 
                        sep = ";", quote = TRUE)
-  } else if ( overwrite ) {
+  } else if (overwrite) {
     data.table::fwrite(df.transaction.history.init, file.path(path, file))
   }
 
@@ -31,7 +31,7 @@ init_transaction_history <- function(path, file, overwrite = FALSE) {
 #'
 #' @usage update_transaction_history(df.transactions, path, file)
 #' 
-#' @param df.transactions A data.frame which contains transactions (e.g., results from [get_transactions()])
+#' @param df.transactions A data frame which contains transactions (e.g., results from [get_transactions()])
 #' @param path A single character string. The path of the csv file.
 #' @param file A single character string. The name of the csv file.
 #'

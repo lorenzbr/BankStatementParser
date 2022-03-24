@@ -7,7 +7,7 @@
 get_cortalconsors_transaction(df.pdf.page)
 }
 \arguments{
-\item{df.pdf.page}{A \code{data.frame} which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+\item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \description{
 Get transaction from Cortal Consors bank statement

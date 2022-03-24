@@ -10,20 +10,22 @@
 #' @return A data frame containing current portfolio.
 #'
 #' @noRd
-read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRUE, ...) {
+read_pdf <- function(file, skip = 0, remove.empty = TRUE, 
+                     trim = TRUE, ocr = TRUE, ...) {
   
   ## use pdftools to read in the document
   text <- pdftools::pdf_text(file, ...)
   
   ## Use ocr if pdf is raster not text
-  if ( all(text %in% '') & isTRUE(ocr) ) {
+  if (all(text %in% '') && isTRUE(ocr)) {
     
-    if ( requireNamespace("tesseract", quietly = TRUE) ) {
+    if (requireNamespace("tesseract", quietly = TRUE)) {
       
       temp <- tempdir()
       fls <- file.path(
         temp,
-        paste0(gsub('\\.pdf$', '', base_name(file)), '_', pad_left(seq_along(text)), '.png')
+        paste0(gsub('\\.pdf$', '', base_name(file)), '_', 
+               pad_left(seq_along(text)), '.png')
       )
       
       ## Convert to png files for tesseract to interact with
@@ -53,23 +55,24 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRU
   Encoding(text) <- "UTF-8"
   text <- strsplit(text, split)
   
-  ## formatting 1
-  if ( isTRUE(remove.empty) ) text <- lapply(text, function(x) x[!grepl("^\\s*$", x)])
+  ## Formatting 1
+  if (isTRUE(remove.empty)) 
+    text <- lapply(text, function(x) x[!grepl("^\\s*$", x)])
   
-  ## coerce to a data.frame with page numbers
+  ## Coerce to a data frame with page numbers
   out <- data.frame(page_id = rep(seq_along(text), sapply(text, length)), 
                     element_id = unlist(sapply(text, function(x) seq_len(length(x)))),
                     text = unlist(text), stringsAsFactors = FALSE)
   
-  ## formatting 2
-  if ( skip > 0 ) out <- utils::tail(out, -c(skip))
-  if ( isTRUE(trim) ) out[['text']] <- trimws(out[['text']])
+  ## Formatting 2
+  if (skip > 0) out <- utils::tail(out, -c(skip))
+  if (isTRUE(trim)) out[['text']] <- trimws(out[['text']])
   
   class(out) <- c("textreadr", "data.frame")
   out
 }
 
-pad_left <- function(x, len = 1 + max(nchar(x)), char = '0'){
+pad_left <- function(x, len = 1 + max(nchar(x)), char = '0') {
   
   unlist(lapply(x, function(x) {
     paste0(
@@ -77,6 +80,7 @@ pad_left <- function(x, len = 1 + max(nchar(x)), char = '0'){
       x
     )
   }))
+  
 }
 
 #' Utilities for Looping to Read In Documents Copy paste from textreadr

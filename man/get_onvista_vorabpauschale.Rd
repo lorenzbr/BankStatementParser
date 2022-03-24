@@ -7,7 +7,7 @@
 get_onvista_vorabpauschale(df.pdf.page)
 }
 \arguments{
-\item{df.pdf.page}{A data.frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+\item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \description{
 Get tax prepayment transaction from onVista bank statement
