@@ -153,10 +153,9 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
       df.transactions <- get_scalablecapital_transaction(df.pdf.page)
 
-    } ## End if statement onVista, DKB, Scalable Capital or Cortal Consors transaction
+    }
 
 
-    ## Add column with first page
     df.transactions$document_page <- first.page
 
     document.size <- length(unique(df.pdf$page_id))
@@ -167,7 +166,6 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     if (document.size > 1) {
 
-      ## For loop over all transaction in PDF document
       for (document.page in document.pages) {
 
         ## Select page from entire pdf
@@ -176,25 +174,21 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
         ## IDENTIFY ACTUAL TRANSACTION
 
-        ## If depot bank is onVista
         if (depot.bank == onvista) 
           df.transaction.temp <- get_onvista_transaction(df.pdf.page)
 
-        ## Add document page
         df.transaction.temp$document_page <- document.page
 
-        ## Combine entire output in data frame
         df.transactions <- rbind(df.transactions, df.transaction.temp)
 
-      } ## End of for loop over all transactions/pages in pdf
+      }
 
-    } ## End if condition: if more than 1 page
+    }
 
-    ## Add document name to data frame
     df.transactions$document_name <- document.name
 
-    ## Change date style
-    df.transactions$transaction_date <- gsub("\\.", "-", df.transactions$transaction_date)
+    df.transactions$transaction_date <- gsub("\\.", "-", 
+                                             df.transactions$transaction_date)
 
     return(df.transactions) 
     

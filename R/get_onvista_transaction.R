@@ -6,7 +6,7 @@
 #' @export
 get_onvista_transaction <- function(df.pdf.page) {
 
-  ## Better to replace all df.pdf with df.pdf.page
+  ## To do: Better to replace all df.pdf with df.pdf.page
   df.pdf <- df.pdf.page
 
   ## Identify type of transaction
@@ -42,7 +42,7 @@ get_onvista_transaction <- function(df.pdf.page) {
 
     stop(paste("Transaction type of document is unknown."))
 
-  } ## End of if else condition for transaction type (purchase, sale, dividend, storno, steuerliche vorabpauschale)
+  }
 
   return(df.transaction.output)
 
@@ -56,31 +56,26 @@ get_onvista_transaction <- function(df.pdf.page) {
 #' @export
 get_onvista_purchase <- function(df.pdf.page) {
 
-  ## This is a purchase transaction
   transaction.type  <- "Purchase"
 
-  ## Get start and end position of transaction
   start.transaction.data <- grep("wir haben f.?r sie gekauft", df.pdf.page$text) + 1
   end.transaction.data <- grep("betrag zu ihren lasten", df.pdf.page$text) + 1
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
   ## Identify position of ISIN and Gattungsbezeichnung
   position.isin <- grep("isin", df.transaction.data$text) + 1
 
-  ## last word one row later is actual ISIN
+  ## Last word one row later is the actual ISIN
   isin <- stringr::str_extract(df.transaction.data$text_original[position.isin], 
                                pattern = '\\w+$')
   wkn <- NA
 
-  ## Identify investment name
   investmentname <- df.transaction.data$text_original[position.isin]
   investmentname <- gsub(isin, "", investmentname)
   investmentname <- gsub("\\s+"," ", investmentname)
   investmentname <- gsub(" $","", investmentname)
 
-  ## Identify quantity
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                        "\\s+\\s+")[[1]][1]
@@ -106,7 +101,6 @@ get_onvista_purchase <- function(df.pdf.page) {
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
   
-  ## Identify transaction price
   transaction.price <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                 "\\s+\\s+")[[1]][2]
   if (grepl("EUR", transaction.price)) {
@@ -120,7 +114,6 @@ get_onvista_purchase <- function(df.pdf.page) {
     transaction.price <- transaction.price / transaction.exchangerate
   }
 
-  ## Identify transaction date
   transaction.date <- strsplit(df.transaction.data$text_original[grep("^handelstag", 
                                                                       df.transaction.data$text)], 
                                "\\s+\\s+")[[1]][2]
@@ -135,7 +128,7 @@ get_onvista_purchase <- function(df.pdf.page) {
   transaction.fee <- NA
   for (i in 1:length(fee.terms)) {
     position.fee1 <- grep(fee.terms[i], df.transaction.data$text)
-    if (!(rlang::is_empty(position.fee1))) {
+    if (length(position.fee1) > 0) {
       transaction.fee1 <- strsplit(df.transaction.data$text_original[position.fee1], 
                                    "\\s+\\s+")[[1]][5]
       transaction.fee1 <- sub("-", "", transaction.fee1, fixed = TRUE)
@@ -144,7 +137,6 @@ get_onvista_purchase <- function(df.pdf.page) {
     }
   }
 
-  ## Store data in data frame
   df.transaction.output <- data.frame(
     isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
@@ -164,10 +156,8 @@ get_onvista_purchase <- function(df.pdf.page) {
 #' @export
 get_onvista_sale <- function(df.pdf.page) {
 
-  ## This is a sales transaction
   transaction.type  <- "Sale"
 
-  ## Get position of "wir haben f.?r sie gekauft"
   start.transaction.data <- grep("wir haben f.?r sie verkauft", df.pdf.page$text) + 1
   end.transaction.data <- grep("betrag zu ihren gunsten", df.pdf.page$text) + 1
   
@@ -175,7 +165,6 @@ get_onvista_sale <- function(df.pdf.page) {
   ## of taxes/veraeusserungsverlust aktien usw. then take the last row)
   end.transaction.data <- end.transaction.data[length(end.transaction.data)]
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
   ## Identify position of ISIN and Gattungsbezeichnung
@@ -188,13 +177,11 @@ get_onvista_sale <- function(df.pdf.page) {
   ## For other banks WKN is available, here simply set to NA
   wkn <- NA
 
-  ## Identify investment name
   investmentname <- df.transaction.data$text_original[position.isin]
   investmentname <- gsub(isin, "", investmentname)
   investmentname <- gsub("\\s+", " ", investmentname)
   investmentname <- gsub(" $", "", investmentname)
 
-  ## Identify quantity
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                        "\\s+\\s+")[[1]][1]
@@ -225,7 +212,6 @@ get_onvista_sale <- function(df.pdf.page) {
   }
   transaction.value <- transaction.value.final
   
-  ## Identify transaction price
   transaction.price <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                 "\\s+\\s+")[[1]][2]
   if (grepl("EUR", transaction.price)) {
@@ -239,7 +225,6 @@ get_onvista_sale <- function(df.pdf.page) {
     transaction.price <- transaction.price / transaction.exchangerate
   }
 
-  ## Identify transaction date
   transaction.date <- strsplit(df.transaction.data$text_original[grep("^handelstag", 
                                                                       df.transaction.data$text)], 
                                "\\s+\\s+")[[1]][2]
@@ -254,7 +239,7 @@ get_onvista_sale <- function(df.pdf.page) {
   transaction.fee <- NA
   for (i in 1:length(fee.terms)) {
     position.fee1 <- grep(fee.terms[i], df.transaction.data$text)
-    if (!rlang::is_empty(position.fee1)) {
+    if (length(position.fee1) > 0) {
       transaction.fee1 <- strsplit(df.transaction.data$text_original[position.fee1], 
                                    "\\s+\\s+")[[1]][5]
       transaction.fee1 <- sub("-", "", transaction.fee1, fixed = TRUE)
@@ -263,7 +248,6 @@ get_onvista_sale <- function(df.pdf.page) {
     }
   }
 
-  ## Store data in data frame
   df.transaction.output <- data.frame(
     isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
@@ -283,7 +267,6 @@ get_onvista_sale <- function(df.pdf.page) {
 #' @export
 get_onvista_dividend <- function(df.pdf.page) {
 
-  ## This is a dividend transaction
   transaction.type  <- "Dividend"
 
   ## Get position of transaction
@@ -291,7 +274,6 @@ get_onvista_dividend <- function(df.pdf.page) {
                                  df.pdf.page$text)[2] + 1
   end.transaction.data <- grep("betrag zu ihren gunsten", df.pdf.page$text) + 1
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
   ## Identify position of ISIN and Gattungsbezeichnung
@@ -302,20 +284,17 @@ get_onvista_dividend <- function(df.pdf.page) {
                                pattern = '\\w+$')
   wkn <- NA
 
-  ## identify investment name
   investmentname <- df.transaction.data$text_original[position.isin]
   investmentname <- gsub(isin, "", investmentname)
   investmentname <- gsub("\\s+", " ", investmentname)
   investmentname <- gsub(" $", "", investmentname)
 
-  ## Identify quantity
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                        "\\s+\\s+")[[1]][1]
   quantity <- gsub("STK ", "", quantity)
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
-  ## Identify transaction date
   transaction.date <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                "\\s+\\s+")[[1]][3]
   transaction.time <- NA
@@ -339,7 +318,6 @@ get_onvista_dividend <- function(df.pdf.page) {
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction price
   transaction.price <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                 "\\s+\\s+")[[1]][4]
   if (grepl("EUR", transaction.price)) {
@@ -353,10 +331,9 @@ get_onvista_dividend <- function(df.pdf.page) {
     transaction.price <- transaction.price / transaction.exchangerate
   }
 
-  ## Identify transaction fee
+  ## Fee not available for this transaction type
   transaction.fee <- NA
 
-  ## Store data in data frame
   df.transaction.output <- data.frame(
     isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
@@ -376,7 +353,6 @@ get_onvista_dividend <- function(df.pdf.page) {
 #' @export
 get_onvista_vorabpauschale <- function(df.pdf.page) {
 
-  ## This is a dividend transaction
   transaction.type  <- "Steuerpflichtige Vorabpauschale"
 
   ## Get position of transaction
@@ -384,7 +360,6 @@ get_onvista_vorabpauschale <- function(df.pdf.page) {
                                  df.pdf.page$text)[1] + 2
   end.transaction.data <- grep("betrag zu ihren lasten", df.pdf.page$text) + 1
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
 
@@ -396,20 +371,17 @@ get_onvista_vorabpauschale <- function(df.pdf.page) {
                                pattern = '\\w+$')
   wkn <- NA
 
-  ## Identify investment name
   investmentname <- df.transaction.data$text_original[position.isin]
   investmentname <- gsub(isin, "", investmentname)
   investmentname <- gsub("\\s+", " ", investmentname)
   investmentname <- gsub(" $", "", investmentname)
 
-  ## Identify quantity
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                        "\\s+\\s+")[[1]][1]
   quantity <- gsub("STK ","", quantity)
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
-  ## Identify transaction date
   transaction.date <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                "\\s+\\s+")[[1]][3]
   transaction.time <- NA
@@ -432,7 +404,6 @@ get_onvista_vorabpauschale <- function(df.pdf.page) {
   transaction.value <- strings.with.transaction.value[transaction.value.position]
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction price
   transaction.price <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                 "\\s+\\s+")[[1]][4]
   if (grepl("EUR", transaction.price)) {
@@ -444,10 +415,9 @@ get_onvista_vorabpauschale <- function(df.pdf.page) {
     transaction.price <- transaction.price / transaction.exchangerate
   }
 
-  ## Identify transaction fee
+  ## Fee not available for this transaction type
   transaction.fee <- NA
 
-  ## Store data in data frame
   df.transaction.output <- data.frame(
     isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
@@ -467,7 +437,6 @@ get_onvista_vorabpauschale <- function(df.pdf.page) {
 #' @export
 get_onvista_stornodividend <- function(df.pdf.page) {
 
-  ## This is a dividend transaction
   transaction.type  <- "Storno - Dividend"
 
   ## Get position of transaction
@@ -476,7 +445,6 @@ get_onvista_stornodividend <- function(df.pdf.page) {
   end.transaction.data <- grep("storno unserer ertr.?gnisgutschrift", 
                                df.pdf.page$text) - 1
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
 
@@ -488,20 +456,17 @@ get_onvista_stornodividend <- function(df.pdf.page) {
                                pattern = '\\w+$')
   wkn <- NA
 
-  ## Identify investment name
   investmentname <- df.transaction.data$text_original[position.isin]
   investmentname <- gsub(isin, "", investmentname)
   investmentname <- gsub("\\s+", " ", investmentname)
   investmentname <- gsub(" $", "", investmentname)
 
-  ## Identify quantity
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                        "\\s+\\s+")[[1]][1]
   quantity <- gsub("STK ", "", quantity)
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
-  ## Identify transaction date
   transaction.date <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                "\\s+\\s+")[[1]][3]
   transaction.time <- NA
@@ -524,7 +489,6 @@ get_onvista_stornodividend <- function(df.pdf.page) {
   transaction.value <- strings.with.transaction.value[transaction.value.position]
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction price
   transaction.price <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
                                 "\\s+\\s+")[[1]][4]
   if (grepl("EUR", transaction.price)) {
@@ -536,10 +500,9 @@ get_onvista_stornodividend <- function(df.pdf.page) {
     transaction.price <- transaction.price / transaction.exchangerate
   }
 
-  ## Identify transaction fee
+  ## Fee not available for this transaction type
   transaction.fee <- NA
 
-  ## Store data in data frame
   df.transaction.output <- data.frame(
     isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 

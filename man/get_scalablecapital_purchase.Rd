@@ -10,7 +10,7 @@ get_scalablecapital_purchase(df.pdf.page)
 \item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \value{
-A data.frame containing the parsed transaction.
+A data frame containing the parsed transaction.
 }
 \description{
 Get purchase transaction from Scalable Capital statement

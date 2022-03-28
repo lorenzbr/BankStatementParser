@@ -12,7 +12,6 @@ Imports:
     tesseract,
     data.table,
     pdftools,
-    rlang,
     stringr,
     textreadr
 License: GPL-3 + file LICENSE
