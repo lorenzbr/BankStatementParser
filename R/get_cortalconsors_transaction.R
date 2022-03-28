@@ -6,7 +6,6 @@
 #' @export
 get_cortalconsors_transaction <- function(df.pdf.page) {
 
-  ## Identify type of transaction
   purchase.identifier <- "kauf"
   sale.identifier <- "verkauf"
   salepart.identifier <- "verk. teil"
@@ -66,7 +65,7 @@ get_cortalconsors_purchase <- function(df.pdf.page) {
   isin <- strsplit(df.transaction.data$text_original[position.isin], 
                    "\\s+\\s+\\s+")[[1]][3]
 
-  investmentname <- strsplit(df.transaction.data$text_original[position.isin], 
+  investment.name <- strsplit(df.transaction.data$text_original[position.isin], 
                              "\\s+\\s+\\s+")[[1]][1]
 
   quantity <- strsplit(df.transaction.data$text_original[startsWith(df.transaction.data$text, 
@@ -93,21 +92,15 @@ get_cortalconsors_purchase <- function(df.pdf.page) {
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction fee
-  fee.terms <- c("grundgeb.?hr")
-  transaction.fee <- NA
-  for (i in 1:length(fee.terms)) {
-    position.fee1 <- grep(fee.terms[i], df.transaction.data$text)
-    if (length(position.fee1) > 0) {
-      transaction.fee1 <- strsplit(df.transaction.data$text_original[position.fee1], 
-                                   "\\s+\\s+")[[1]][3]
-      transaction.fee1 <- as.numeric(sub(",", ".", transaction.fee1, fixed = TRUE))
-      transaction.fee <- sum(transaction.fee, transaction.fee1, na.rm = TRUE)
-    }
+  position.fee <- grep("grundgeb.?hr", df.transaction.data$text)
+  if (length(position.fee) > 0) {
+    transaction.fee <- strsplit(df.transaction.data$text_original[position.fee], 
+                                 "\\s+\\s+")[[1]][3]
+    transaction.fee <- as.numeric(sub(",", ".", transaction.fee, fixed = TRUE))
   }
   
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type
@@ -127,40 +120,33 @@ get_cortalconsors_sale <- function(df.pdf.page) {
 
   transaction.type  <- "Sale"
 
-  ## Get start and end position of transaction
   start.transaction.data <- grep("^wertpapierabrechnung", df.pdf.page$text) + 1
   end.transaction.data <- grep("zugunsten konto", df.pdf.page$text)
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
   ## Identify position of ISIN, WKN, quantity and name
   position.isin <- grep("isin", df.transaction.data$text) + 1
 
-  ## Identify WKN and ISIN
   wkn <- strsplit(df.transaction.data$text_original[position.isin], 
                   "\\s+\\s+\\s+")[[1]][2]
   isin <- strsplit(df.transaction.data$text_original[position.isin], 
                    "\\s+\\s+\\s+")[[1]][3]
 
-  ## Identify investment name
-  investmentname <- strsplit(df.transaction.data$text_original[position.isin], 
+  investment.name <- strsplit(df.transaction.data$text_original[position.isin], 
                              "\\s+\\s+\\s+")[[1]][1]
 
-  ## Identify quantity
   quantity <- strsplit(df.transaction.data$text_original[startsWith(df.transaction.data$text, 
                                                                     "st")],
                        "\\s+\\s+\\s+")[[1]][2]
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
-  ## Identify transaction price
   position.price <- grep("^kurs ", df.transaction.data$text)
   transaction.price <- strsplit(df.transaction.data$text_original[position.price], 
                                 "\\s+\\s+")[[1]][2]
   transaction.price <- strsplit(transaction.price, " EUR ")[[1]][1]
   transaction.price <- as.numeric(sub(",", ".", transaction.price, fixed = TRUE))
 
-  ## Identify transaction date
   transaction.datetime <- strsplit(df.transaction.data$text_original[grep("^verkauf",
                                                                           df.transaction.data$text)], 
                                    "\\s+\\s+")[[1]][2]
@@ -168,28 +154,23 @@ get_cortalconsors_sale <- function(df.pdf.page) {
   transaction.date <- gsub("AM ", "", transaction.date)
   transaction.time <- strsplit(transaction.datetime, " UM ")[[1]][2]
 
-  ## Identify transaction value
   position.transaction.value <- grep("^wert ", df.transaction.data$text)
   transaction.value <- strsplit(df.transaction.data$text_original[position.transaction.value], 
                                 "\\s+\\s+")[[1]][3]
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction fee (provision)
-  fee.terms <- c("provision")
   transaction.fee <- NA
-  for (i in 1:length(fee.terms)) {
-    position.fee1 <- grep(fee.terms[i], df.transaction.data$text)
-    if (length(position.fee1) > 0) {
-      transaction.fee1 <- strsplit(df.transaction.data$text_original[position.fee1], 
-                                   "\\s+\\s+")[[1]][3]
-      transaction.fee1 <- as.numeric(sub(",", ".", transaction.fee1, fixed = TRUE))
-      transaction.fee <- sum(transaction.fee, transaction.fee1, na.rm = TRUE)
-    }
+  position.fee <- grep("provision", df.transaction.data$text)
+  if (length(position.fee) > 0) {
+    transaction.fee <- strsplit(df.transaction.data$text_original[position.fee], 
+                                 "\\s+\\s+")[[1]][3]
+    transaction.fee <- as.numeric(sub(",", ".", transaction.fee, fixed = TRUE))
   }
 
+
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type
@@ -209,54 +190,45 @@ get_cortalconsors_salepart <- function(df.pdf.page) {
 
   transaction.type  <- "Sale - Part"
 
-  ## Get start and end position of transaction
   start.transaction.data <- grep("^wertpapierabrechnung", df.pdf.page$text) + 1
   end.transaction.data <- grep("zugunsten konto", df.pdf.page$text)
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
   ## Identify position of ISIN, WKN, quantity and name
   position.isin <- grep("isin", df.transaction.data$text) + 1
 
-  ## Identify WKN and ISIN
   wkn <- strsplit(df.transaction.data$text_original[position.isin], 
                   "\\s+\\s+\\s+")[[1]][2]
   isin <- strsplit(df.transaction.data$text_original[position.isin], 
                    "\\s+\\s+\\s+")[[1]][3]
 
-  ## Identify investment name
-  investmentname <- strsplit(df.transaction.data$text_original[position.isin], 
+  investment.name <- strsplit(df.transaction.data$text_original[position.isin], 
                              "\\s+\\s+\\s+")[[1]][1]
 
-  ## Identify quantity
   quantity <- strsplit(df.transaction.data$text_original[startsWith(df.transaction.data$text, 
                                                                     "st")],
                        "\\s+\\s+\\s+")[[1]][2]
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
-  ## Identify transaction price
   position.price <- grep("^kurs ", df.transaction.data$text)
   transaction.price <- strsplit(df.transaction.data$text_original[position.price], 
                                 "\\s+\\s+")[[1]][2]
   transaction.price <- strsplit(transaction.price, " EUR ")[[1]][1]
   transaction.price <- as.numeric(sub(",", ".", transaction.price, fixed = TRUE))
 
-  ## Identify transaction date
   transaction.date <- strsplit(df.transaction.data$text_original[grep("^verk. teil",
                                                                       df.transaction.data$text)], 
                                "\\s+\\s+")[[1]][2]
   transaction.date <- gsub("AM ", "", transaction.date)
   transaction.time <- NA
 
-  ## Identify transaction value
   position.transaction.value <- grep("^wert ", df.transaction.data$text)
   transaction.value <- strsplit(df.transaction.data$text_original[position.transaction.value], 
                                 "\\s+\\s+")[[1]][3]
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction fee (provision)
   fee.terms <- "provision"
   transaction.fee <- NA
   for (i in 1:length(fee.terms)) {
@@ -270,7 +242,7 @@ get_cortalconsors_salepart <- function(df.pdf.page) {
   }
 
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type
@@ -303,14 +275,13 @@ get_cortalconsors_dividend <- function(df.pdf.page) {
   wkn <- strsplit(df.transaction.data$text_original[position.wkn], 
                   "\\s+\\s+\\s+")[[1]][4]
 
-  investmentname <- df.transaction.data$text_original[position.wkn + 1]
+  investment.name <- df.transaction.data$text_original[position.wkn + 1]
 
   quantity <- strsplit(df.transaction.data$text_original[startsWith(df.transaction.data$text, 
                                                                     "st")],
                        "\\s+\\s+\\s+")[[1]][2]
   quantity <- as.numeric(sub(",", ".", quantity, fixed = TRUE))
 
-  ## Identify transaction price
   position.price <- grep("dividendensatz", df.transaction.data$text)
   transaction.price <- strsplit(df.transaction.data$text_original[position.price], 
                                 "\\s+\\s+")[[1]][2]
@@ -331,7 +302,7 @@ get_cortalconsors_dividend <- function(df.pdf.page) {
   transaction.fee <- NA
 
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type

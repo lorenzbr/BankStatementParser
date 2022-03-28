@@ -28,8 +28,6 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
   tryCatch({
 
-    document.name.csv <- paste0(gsub(".pdf$", "", document.name), ".csv")
-
     df.pdf <- read_pdf(file)
 
     df.pdf$text_original <- df.pdf$text
@@ -38,7 +36,7 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
     if (is.na(depot.bank)) {
 
-      ## Define strings for all available depot banks / brokers
+      ## This is the set of currently all available depot banks / brokers
       onvista <- "OnVista"
       dkb <- "DKB AG"
       cortalconsors <- "Cortal Consors"
@@ -93,9 +91,6 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
       
     }
     
-    
-
-    ## First page
     first.page <- 1
     df.pdf.page <- df.pdf[df.pdf$page_id == first.page, ]
 
@@ -170,7 +165,6 @@ get_transactions <- function(file, document.name, all.pages = TRUE, depot.bank =
 
         ## Select page from entire pdf
         df.pdf.page <- df.pdf[df.pdf$page_id == document.page, ]
-
 
         ## IDENTIFY ACTUAL TRANSACTION
 

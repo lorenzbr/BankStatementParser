@@ -6,7 +6,6 @@
 #' @export
 get_dkb_transaction <- function(df.pdf.page) {
 
-  ## Identify type of transaction
   purchase.identifier <- "die wertpapiere schreiben wir ihrem depotkonto gut"
   dividend.identifier <- "^aussch.?ttung"
   storno.identifier <- "storno"
@@ -40,24 +39,21 @@ get_dkb_purchase <- function(df.pdf.page) {
 
   transaction.type  <- "Purchase"
 
-  ## Get start and end position of transaction
   start.transaction.data <- grep("wertpapier abrechnung", df.pdf.page$text) + 1
   end.transaction.data <- grep("ausmachender betrag", df.pdf.page$text)
 
-  ## Keep only text with transaction information
   df.transaction.data <- df.pdf.page[start.transaction.data:end.transaction.data, ]
 
   ## Identify position of ISIN, WKN, quantity and name
   position.isin <- grep("isin", df.transaction.data$text) + 1
 
-  ## Identify ISIN and WKN
   isin <- strsplit(df.transaction.data$text_original[position.isin], 
                    "\\s+\\s+\\s+")[[1]][3]
   wkn <- strsplit(df.transaction.data$text_original[position.isin], 
                   "\\s+\\s+\\s+")[[1]][4]
   wkn <- gsub("\\(|\\)", "", wkn)
 
-  investmentname <- strsplit(df.transaction.data$text_original[position.isin], 
+  investment.name <- strsplit(df.transaction.data$text_original[position.isin], 
                              "\\s+\\s+\\s+")[[1]][2]
 
   quantity <- strsplit(df.transaction.data$text_original[position.isin], 
@@ -84,22 +80,16 @@ get_dkb_purchase <- function(df.pdf.page) {
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction fees
-  fee.terms <- c("provision")
-  transaction.fee <- NA
-  for (i in 1:length(fee.terms)) {
-    position.fee1 <- grep(fee.terms[i], df.transaction.data$text)
-    if (length(position.fee1) > 0) {
-      transaction.fee1 <- strsplit(df.transaction.data$text_original[position.fee1], 
-                                   "\\s+\\s+")[[1]][2]
-      transaction.fee1 <- sub("- EUR", "", transaction.fee1, fixed = TRUE)
-      transaction.fee1 <- as.numeric(sub(",", ".", transaction.fee1, fixed = TRUE))
-      transaction.fee <- sum(transaction.fee, transaction.fee1, na.rm = TRUE)
-    }
+  position.fee <- grep("provision", df.transaction.data$text)
+  if (length(position.fee) > 0) {
+    transaction.fee <- strsplit(df.transaction.data$text_original[position.fee], 
+                                 "\\s+\\s+")[[1]][2]
+    transaction.fee <- sub("- EUR", "", transaction.fee, fixed = TRUE)
+    transaction.fee <- as.numeric(sub(",", ".", transaction.fee, fixed = TRUE))
   }
 
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type
@@ -133,7 +123,7 @@ get_dkb_dividend <- function(df.pdf.page) {
                   "\\s+\\s+\\s+")[[1]][4]
   wkn <- gsub("\\(|\\)", "", wkn)
 
-  investmentname <- strsplit(df.transaction.data$text_original[position.isin], 
+  investment.name <- strsplit(df.transaction.data$text_original[position.isin], 
                              "\\s+\\s+\\s+")[[1]][2]
 
   quantity <- strsplit(df.transaction.data$text_original[position.isin], 
@@ -161,7 +151,7 @@ get_dkb_dividend <- function(df.pdf.page) {
   transaction.fee <- NA
 
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type

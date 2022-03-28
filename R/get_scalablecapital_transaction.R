@@ -10,9 +10,7 @@ get_scalablecapital_transaction <- function(df.pdf.page) {
   ## To do: Better to replace all df.pdf with df.pdf.page
   df.pdf <- df.pdf.page
 
-  ## Identify type of transaction
   purchase.identifier <- "wertpapierabrechnung: kauf"
-
 
   if (any(grepl(purchase.identifier, df.pdf$text))) {
 
@@ -20,7 +18,7 @@ get_scalablecapital_transaction <- function(df.pdf.page) {
 
   } else {
 
-    stop(paste("Transaction type of document is unknown."))
+    stop("Transaction type of document is unknown.")
 
   }
 
@@ -57,8 +55,8 @@ get_scalablecapital_purchase <- function(df.pdf.page) {
   isin <- gsub("ISIN: ", "", isin)
   wkn <- strsplit(isin.wkn, "WKN: ")[[1]][2]
 
-  investmentname <- df.transaction.data$text_original[position.isin + 1]
-  investmentname <- strsplit(investmentname, "\\s+\\s+")[[1]][2]
+  investment.name <- df.transaction.data$text_original[position.isin + 1]
+  investment.name <- strsplit(investment.name, "\\s+\\s+")[[1]][2]
 
   position.quantity.and.price <- grep("^stk", df.transaction.data$text)[1]
   quantity <- strsplit(df.transaction.data$text_original[position.quantity.and.price], 
@@ -82,11 +80,11 @@ get_scalablecapital_purchase <- function(df.pdf.page) {
   transaction.value <- sub(".", "", transaction.value, fixed = TRUE)
   transaction.value <- as.numeric(sub(",", ".", transaction.value, fixed = TRUE))
 
-  ## Identify transaction fee (not available in PDF statement, often EUR 1)
+  ## Identify transaction fee (not available in PDF statement, often it is EUR 1.00)
   transaction.fee <- NA
 
   df.transaction.output <- data.frame(
-    isin = isin, wkn = wkn, name = investmentname, quantity = quantity, 
+    isin = isin, wkn = wkn, name = investment.name, quantity = quantity, 
     transaction_price = transaction.price, transaction_value = transaction.value, 
     transaction_fee = transaction.fee, transaction_date = transaction.date, 
     transaction_time = transaction.time, transaction_type = transaction.type
