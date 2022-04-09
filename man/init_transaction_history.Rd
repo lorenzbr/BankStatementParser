@@ -11,7 +11,8 @@ init_transaction_history(path, file, overwrite = FALSE)
 
 \item{file}{A single character string. The name of the csv file.}
 
-\item{overwrite}{Logical (default is FALSE) indicates whether csv shall be overwritten.}
+\item{overwrite}{Logical (default is FALSE) indicates whether csv
+shall be overwritten.}
 }
 \description{
 Create empty csv file for transaction history

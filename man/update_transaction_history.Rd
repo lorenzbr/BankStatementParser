@@ -4,10 +4,11 @@
 \alias{update_transaction_history}
 \title{Update transaction history stored in a csv file}
 \usage{
-update_transaction_history(df.transactions, path, file)
+update_transaction_history(df_transactions, path, file)
 }
 \arguments{
-\item{df.transactions}{A data frame which contains transactions (e.g., results from \code{\link[=get_transactions]{get_transactions()}})}
+\item{df_transactions}{A data frame which contains transactions
+(e.g., results from \code{\link[=get_transactions]{get_transactions()}})}
 
 \item{path}{A single character string. The path of the csv file.}
 

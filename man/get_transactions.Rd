@@ -5,19 +5,23 @@
 \title{Get transactions from bank statements
 Parse all PDF bank statements to get transaction data}
 \usage{
-get_transactions(file, document.name, all.pages = TRUE, depot.bank = NA)
+get_transactions(file, document_name, all_pages = TRUE, 
+                        depot_bank = NA)
 }
 \arguments{
-\item{file}{A single character string. The full path and file name of the PDF.}
+\item{file}{A single character string. The full path and file name
+of the PDF.}
 
-\item{document.name}{A single character string. The name of the PDF.}
+\item{document_name}{A single character string. The name of the PDF.}
 
-\item{all.pages}{Logical (default is TRUE) which indicates whether to read every page in PDF.}
+\item{all_pages}{Logical (default is TRUE) which indicates whether to
+read every page in PDF.}
 
-\item{depot.bank}{A single character string. Is optional (default is NA).}
+\item{depot_bank}{A single character string. Is optional (default is NA).}
 }
 \value{
-\emph{get_transactions} returns a data.frame with the following columns:
+\emph{get_transactions} returns a data frame with the
+following columns:
 \itemize{
 \item{isin}{ The identifier ISIN}
 \item{wkn}{ The identifier WKN}

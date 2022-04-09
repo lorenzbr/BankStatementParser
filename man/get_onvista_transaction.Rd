@@ -4,10 +4,14 @@
 \alias{get_onvista_transaction}
 \title{Get transaction from onVista bank statement}
 \usage{
-get_onvista_transaction(df.pdf.page)
+get_onvista_transaction(df_pdf_page)
 }
 \arguments{
-\item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+\item{df_pdf_page}{A data frame which results from the
+function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+}
+\value{
+A data frame containing the parsed transaction.
 }
 \description{
 Get transaction from onVista bank statement

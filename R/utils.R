@@ -1,12 +1,15 @@
 #' Read PDF document modified from R package textreadr
 #'
-#' @usage read_pdf(file, skip = 0, remove.empty = TRUE, trim = TRUE, ocr = TRUE, ...)
+#' @usage read_pdf(file, skip = 0, remove.empty = TRUE, 
+#'                 trim = TRUE, ocr = TRUE, ...)
 #' @param file A path to a PDF file.
-#' @param skip Integer; the number of lines of the data file to skip before beginning to read data.
+#' @param skip Integer; the number of lines of the data file to skip before 
+#' beginning to read data.
 #' @param remove.empty logical
 #' @param trim logical
 #' @param ocr logical
 #' @param ... Other arguments to be passed to the function
+#' 
 #' @return A data frame containing current portfolio.
 #'
 #' @noRd
@@ -39,7 +42,7 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE,
       
     } else {
       
-      warning('\'tesseract\' not available.  `ocr = TRUE` ignored.\n\nPlease use `install.packages(\'tesseract\')` and then retry.', call. = FALSE)
+      warning('\'tesseract\' not available. `ocr = TRUE` ignored.\n\nPlease use `install.packages(\'tesseract\')` and then retry.', call. = FALSE)
       
     }
     
@@ -61,7 +64,8 @@ read_pdf <- function(file, skip = 0, remove.empty = TRUE,
   
   ## Coerce to a data frame with page numbers
   out <- data.frame(page_id = rep(seq_along(text), sapply(text, length)), 
-                    element_id = unlist(sapply(text, function(x) seq_len(length(x)))),
+                    element_id = unlist(sapply(text, 
+                                               function(x) seq_len(length(x)))),
                     text = unlist(text), stringsAsFactors = FALSE)
   
   ## Formatting 2

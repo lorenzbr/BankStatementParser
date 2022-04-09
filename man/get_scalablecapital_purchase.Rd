@@ -4,10 +4,11 @@
 \alias{get_scalablecapital_purchase}
 \title{Get purchase transaction from Scalable Capital statement}
 \usage{
-get_scalablecapital_purchase(df.pdf.page)
+get_scalablecapital_purchase(df_pdf_page)
 }
 \arguments{
-\item{df.pdf.page}{A data frame which results from the function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
+\item{df_pdf_page}{A data frame which results from the
+function \code{\link[textreadr:read_pdf]{textreadr::read_pdf()}}.}
 }
 \value{
 A data frame containing the parsed transaction.
