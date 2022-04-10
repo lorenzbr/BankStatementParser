@@ -16,7 +16,7 @@ get_onvista_transaction <- function(df_pdf_page) {
   sale_identifier <- "wir haben f.?r sie verkauft"
   dividend_identifier <- "ertr.?gnisgutschrift aus wertpapieren"
   storno_identifier <- "storno"
-  vorabpauschale.identifier <- "steuerpflichtige vorabpauschale"
+  vorabpauschale_identifier <- "steuerpflichtige vorabpauschale"
 
   if (any(grepl(purchase_identifier, df_pdf$text))) {
 
@@ -26,12 +26,12 @@ get_onvista_transaction <- function(df_pdf_page) {
 
     df_transaction_output <- get_onvista_sale(df_pdf)
 
-  } else if (any(grepl(dividend_identifier, df_pdf$text)) 
-             && !any(grepl(storno_identifier, df_pdf$text))) {
+  } else if (any(grepl(dividend_identifier, df_pdf$text)) &&
+             !any(grepl(storno_identifier, df_pdf$text))) {
 
     df_transaction_output <- get_onvista_dividend(df_pdf)
 
-  } else if (any(grepl(vorabpauschale.identifier, df_pdf$text))) {
+  } else if (any(grepl(vorabpauschale_identifier, df_pdf$text))) {
 
     df_transaction_output <- get_onvista_vorabpauschale(df_pdf)
 

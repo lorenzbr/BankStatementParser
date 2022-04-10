@@ -4,3 +4,4 @@
 ^\.github$
 dev
 ^codecov\.yml$
+tests/testthat/testdata/transactions

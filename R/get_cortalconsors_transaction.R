@@ -19,8 +19,8 @@ get_cortalconsors_transaction <- function(df_pdf_page) {
 
     df_transaction_output <- get_cortalconsors_purchase(df_pdf_page)
 
-  } else if (any(startsWith(df_pdf_page$text, sale_identifier)) 
-             && !(any(startsWith(df_pdf_page$text, salepart_identifier)))) {
+  } else if (any(startsWith(df_pdf_page$text, sale_identifier)) &&
+             !(any(startsWith(df_pdf_page$text, salepart_identifier)))) {
 
     df_transaction_output <- get_cortalconsors_sale(df_pdf_page)
 
@@ -28,8 +28,8 @@ get_cortalconsors_transaction <- function(df_pdf_page) {
 
     df_transaction_output <- get_cortalconsors_salepart(df_pdf_page)
 
-  } else if (any(startsWith(df_pdf_page$text, dividend_identifier)) 
-             && !(any(grepl(storno_identifier, df_pdf_page$text)))) {
+  } else if (any(startsWith(df_pdf_page$text, dividend_identifier)) &&
+             !(any(grepl(storno_identifier, df_pdf_page$text)))) {
 
     df_transaction_output <- get_cortalconsors_dividend(df_pdf_page)
 

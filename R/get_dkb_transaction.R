@@ -17,8 +17,8 @@ get_dkb_transaction <- function(df_pdf_page) {
 
     df_transaction_output <- get_dkb_purchase(df_pdf_page)
 
-  } else if (any(grepl(dividend_identifier, df_pdf_page$text)) 
-             && !(any(grepl(storno_identifier, df_pdf_page$text)))) {
+  } else if (any(grepl(dividend_identifier, df_pdf_page$text)) &&
+             !(any(grepl(storno_identifier, df_pdf_page$text)))) {
 
     df_transaction_output <- get_dkb_dividend(df_pdf_page)
 

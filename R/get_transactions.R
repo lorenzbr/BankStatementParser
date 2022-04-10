@@ -48,7 +48,7 @@ get_transactions <- function(file, document_name, all_pages = TRUE,
       scalablecapital <- "Scalable Capital"
 
       #### IDENTIFY DEPOT BANK
-      if (any(grepl("cortal consors", df_pdf$text))) { 
+      if (any(grepl("cortal consors", df_pdf$text))) {
         
         depot_bank <- cortalconsors
 
@@ -56,8 +56,8 @@ get_transactions <- function(file, document_name, all_pages = TRUE,
         
         depot_bank <- scalablecapital
         
-      } else if (any(grepl("onvista bank", df_pdf$text))
-                 || any(grepl("dieser beleg wird maschinell erstellt", 
+      } else if (any(grepl("onvista bank", df_pdf$text)) ||
+                 any(grepl("dieser beleg wird maschinell erstellt", 
                               df_pdf$text))) {
         
         depot_bank <- onvista
