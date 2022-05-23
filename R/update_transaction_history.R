@@ -23,8 +23,9 @@ init_transaction_history <- function(path, file, overwrite = FALSE) {
   file_path <- file.path(path, file)
   
   if (!file.exists(file_path)) {
-    data.table::fwrite(df_transaction_history_init, file_path, 
-                       sep = ";", quote = TRUE)
+    data.table::fwrite(df_transaction_history_init, 
+                       file_path, 
+                       quote = TRUE)
   } else if (overwrite) {
     data.table::fwrite(df_transaction_history_init, file_path)
   }
@@ -50,7 +51,6 @@ update_transaction_history <- function(df_transactions, path, file) {
   data.table::fwrite(df_transactions, 
                      file_path, 
                      append = TRUE, 
-                     sep = ";", 
                      quote = TRUE)
 
   ## Check that transactions are unique (i.e., no duplicates based 
@@ -59,7 +59,6 @@ update_transaction_history <- function(df_transactions, path, file) {
   df_transaction_history <- unique(df_transaction_history)
   data.table::fwrite(df_transaction_history, 
                      file_path, 
-                     sep = ";", 
                      quote = TRUE)
 
 }
